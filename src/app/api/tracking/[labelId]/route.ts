@@ -1,11 +1,15 @@
 import { shipengine } from "@/lib/shipengine";
 import { NextRequest, NextResponse } from "next/server";
 
+interface RouteParams {
+  labelId: string;
+}
+
 export async function GET(
   req: NextRequest,
-  { params }: { params: { labelId: string } } // Corrected params type
+  context: { params: RouteParams } // Corrected type definition here
 ) {
-  const { labelId } = params;
+  const { labelId } = context.params;
 
   // Validate the labelId
   if (!labelId) {
@@ -30,54 +34,9 @@ export async function GET(
   } catch (error) {
     console.error("Error tracking label:", error);
 
-    // Return a specific error message based on the error type
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message || "Failed to fetch tracking data" },
-        { status: 500 }
-      );
-    }
-
-    // Return a generic error message for unknown errors
     return NextResponse.json(
-      { error: "An unknown error occurred" },
+      { error: error instanceof Error ? error.message : "Failed to fetch tracking data" },
       { status: 500 }
     );
   }
 }
-
-
-
-
-
-
-// // import { shipengine } from "@/lib/shipengine";
-// // import { NextRequest, NextResponse } from "next/server";
-
-// // export async function GET(
-// //   req: NextRequest,
-// //   {
-// //     params,
-// //   }: {
-// //     params: Promise<{ labelId: string }>;
-// //   }
-// // ) {
-// //   const labelId = (await params).labelId;
-// //   if (!labelId) {
-// //     return new Response(JSON.stringify({ error: "Missing required fields" }), {
-// //       status: 400,
-// //     });
-// //   }
-
-// //   try {
-// //     const label = await shipengine.trackUsingLabelId(labelId);
-// //     console.log(label);
-
-// //     return NextResponse.json(label, { status: 200 });
-// //   } catch (error) {
-// //     console.log(error);
-// //     return new Response(JSON.stringify({ error: error }), {
-// //       status: 500,
-// //     });
-// //   }
-// // }
