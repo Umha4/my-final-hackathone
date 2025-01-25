@@ -7,10 +7,12 @@ export async function GET(
 ) {
   const { labelId } = params;
 
+  // Validate the labelId
   if (!labelId) {
-    return new Response(JSON.stringify({ error: "Missing required fields" }), {
-      status: 400,
-    });
+    return NextResponse.json(
+      { error: "Missing required field: labelId" },
+      { status: 400 }
+    );
   }
 
   try {
@@ -21,27 +23,28 @@ export async function GET(
 
     // Track the label using ShipEngine
     const label = await shipengine.trackUsingLabelId(labelId);
-    console.log(label);
+    console.log("Label tracking data:", label);
 
+    // Return the tracking data
     return NextResponse.json(label, { status: 200 });
   } catch (error) {
     console.error("Error tracking label:", error);
 
-    // Return a generic error message
-    return new Response(
-      JSON.stringify({ error: "Failed to fetch tracking data" }),
-      {
-        status: 500,
-      }
+    // Return a specific error message based on the error type
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message || "Failed to fetch tracking data" },
+        { status: 500 }
+      );
+    }
+
+    // Return a generic error message for unknown errors
+    return NextResponse.json(
+      { error: "An unknown error occurred" },
+      { status: 500 }
     );
   }
 }
-
-
-
-
-
-
 
 
 
